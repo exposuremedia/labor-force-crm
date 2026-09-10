@@ -301,9 +301,15 @@ export async function POST(request: Request) {
     checklists:         pick(payload, "checklists"),
   };
 
-  const { data, error } = await client
+  // Generate the row id here instead of relying on INSERT ... RETURNING.
+  // The intake endpoint writes with the anon key, which has an INSERT policy
+  // but no SELECT policy — a RETURNING clause would be rejected by RLS.
+  const newId = crypto.randomUUID();
+
+  const { error } = await client
     .from("crm_contacts")
     .insert({
+      id: newId,
       first_name: first,
       last_name: last,
       email,
@@ -325,9 +331,7 @@ export async function POST(request: Request) {
       // sorts new leads to the top alongside historical GHL-migrated rows.
       ghl_date_added: new Date().toISOString(),
       raw_payload: payload as unknown as Record<string, unknown>,
-    })
-    .select("id")
-    .single();
+    });
 
   if (error) {
     return NextResponse.json(
@@ -339,7 +343,7 @@ export async function POST(request: Request) {
   // 2) ntfy.sh push notification — fire and forget
   try {
     const leadName = [first, last].filter(Boolean).join(" ") || company || "New Lead";
-    const contactUrl = `https://crm.laborforcelink.com/contacts/${data?.id}`;
+    const contactUrl = `https://crm.laborforcelink.com/contacts/${newId}`;
     await fetch("https://ntfy.sh/em-leads-xk7", {
       method: "POST",
       headers: {
@@ -361,7 +365,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       ok: true,
-      id: data?.id,
+      id: newId,
       ghl_contact_id: ghlResult.ghlContactId,
       ghl_error: ghlResult.error,
     },
