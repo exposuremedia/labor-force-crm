@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,14 +12,20 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const response = await fetch("/auth/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: email, password }),
+      });
+      const result = await response.json();
+      if (!response.ok) { setError(result.error || "Unable to sign in."); return; }
+      window.location.href = "/";
+    } catch {
+      setError("Unable to connect. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    window.location.href = "/";
   }
 
   return (
@@ -94,10 +99,14 @@ export default function LoginPage() {
                 letterSpacing: "-0.014em",
               }}
             >
-              Email
+              Username or email
             </label>
             <input
-              type="email"
+              type="text"
+              aria-label="Username or email"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -119,6 +128,8 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
+              aria-label="Password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

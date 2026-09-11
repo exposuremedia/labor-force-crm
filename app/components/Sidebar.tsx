@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WelcomeTour } from "./WelcomeTour";
 import { SignOutButton } from "../signout-button";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -34,56 +35,7 @@ export function Sidebar({
         className="flex items-center gap-3 group"
         style={{ padding: "8px 10px 22px 10px" }}
       >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: "var(--color-brand)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 600,
-              fontSize: 13,
-              color: "#fff",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            LFL
-          </span>
-        </div>
-        <div>
-          <div
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 15,
-              fontWeight: 600,
-              color: "#ffffff",
-              letterSpacing: "-0.012em",
-              lineHeight: 1.1,
-            }}
-          >
-            Labor Force Link
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "var(--color-sidebar-muted)",
-              marginTop: 2,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              fontFamily: "var(--font-text)",
-            }}
-          >
-            CRM
-          </div>
-        </div>
+        <img className="lfl-brand-logo" src="/assets/lfl-logo.png" alt="LaborForceLink — Connecting Skilled Crews" />
       </Link>
 
       <nav className="flex flex-col gap-1">
@@ -94,6 +46,7 @@ export function Sidebar({
             className="em-sidebar-link"
             data-active={active === item.key ? "true" : undefined}
           >
+            <img className="lfl-nav-icon" src={item.key === "contacts" ? "/assets/icon-worker.png" : "/assets/icon-crane.png"} alt="" />
             <span style={{ flex: 1 }}>{item.label}</span>
             {item.key === "contacts" && hotCount > 0 && (
               <span className="crm-nav-badge">{hotCount}</span>
@@ -109,6 +62,7 @@ export function Sidebar({
         >
           Home ↗
         </a>
+        {userEmail && <WelcomeTour userEmail={userEmail} />}
       </nav>
 
       <div className="flex-1" />

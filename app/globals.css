@@ -1,4 +1,33 @@
 @import "tailwindcss";
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/assets/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Ew-.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/assets/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCu170w-.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/assets/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(/assets/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCvC70w-.ttf) format('truetype');
+}
+
 
 /* ─── Exposure Media CRM — Apple-inspired design system ──────────────────
    Surfaces: pure white canvas + parchment tiles. Ink: near-black #1d1d1f.
@@ -1253,3 +1282,118 @@ html.theme-ready .surface-card {
 [data-theme="dark"] .crm-region-badge[data-region="CONCRETE"] { background:rgba(176,190,197,.16); color:#cfd8dc; border-color:rgba(176,190,197,.4); }
 [data-theme="dark"] .crm-region-badge[data-region="PATIO"]    { background:rgba(231,192,138,.16); color:#e7c08a; border-color:rgba(231,192,138,.4); }
 [data-theme="dark"] .crm-region-badge[data-region="TURF"]     { background:rgba(143,206,159,.16); color:#8fce9f; border-color:rgba(143,206,159,.4); }
+
+/* Labor Force Link UI refresh — presentation only.
+   Existing routes, field names, event handlers and API contracts are retained. */
+:root { --color-brand-soft: #eef4df; --color-sidebar-active: #253014; }
+::selection { background: #baf70355; }
+.crm-main { background: var(--color-pearl); }
+.crm-topbar { min-height: 94px; }
+.crm-page-title { font-size: 30px; font-weight: 700; letter-spacing: -.035em; }
+.em-sidebar-link { min-height: 42px; border: 1px solid transparent; }
+.em-sidebar-link[data-active="true"] { border-color: #baf70330; box-shadow: inset 3px 0 #baf703; }
+.crm-stats { margin: 24px 32px; gap: 14px; background: transparent; border: 0; }
+.crm-stat { border: 1px solid var(--color-ink-08); border-radius: 14px; padding: 24px; background: var(--color-white); box-shadow: 0 2px 5px #00000003; }
+.crm-stat:last-child { border-right: 1px solid var(--color-ink-08); }
+.crm-stat-label { font-size: 14px; color: var(--color-ink-80); }
+.crm-stat-value { font-weight: 650; letter-spacing: -.04em; }
+.crm-filters { gap: 8px; padding: 14px 32px; }
+.crm-filter { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 7px 13px; border: 1px solid var(--color-ink-08); border-radius: 7px; font-size: 14px; line-height: 1.4; color: var(--color-ink-80); text-decoration: none; transition: background 120ms, border-color 120ms; }
+.crm-filter:hover { background: var(--color-parchment); border-color: var(--color-brand); }
+.crm-filter.active { background: var(--color-brand-soft); color: var(--color-brand-deep); border-color: var(--color-brand); font-weight: 600; }
+.crm-search { padding: 12px 16px; border-radius: 10px; }
+.crm-col-header { padding: 17px 32px; background: var(--color-pearl); }
+.crm-row { padding: 20px 32px; }
+.crm-row:hover { box-shadow: inset 3px 0 var(--color-brand); background: var(--color-pearl); }
+.crm-avatar { border-radius: 10px; width: 40px; height: 40px; }
+.crm-name { font-size: 16px; }
+.crm-empty { padding: 100px 24px; font-size: 16px; }
+.ghl-header { padding: 20px 24px; }
+.ghl-count-chip { background: var(--color-brand-soft); }
+.ghl-pipeline, .ghl-board { background: var(--color-pearl); }
+.ghl-toolbar { margin: 18px 20px 0; border: 1px solid var(--color-ink-08); border-radius: 11px; padding: 12px; background: var(--color-white); }
+.ghl-pipeline-select, .ghl-icon-btn, .ghl-tool-btn, .ghl-search input { background: var(--color-white); }
+.ghl-tool-btn, .ghl-search input { font-size: 14px; min-height: 38px; }
+.ghl-col { border-color: var(--color-ink-08); border-radius: 12px; }
+.ghl-col-head { padding: 18px 15px 14px; border-color: var(--color-ink-08); }
+.ghl-col-name { font-size: 15px; }
+.ghl-col-body { padding: 12px; }
+.ghl-empty { padding: 35px 10px; font-size: 14px; }
+.ghl-card { border-color: var(--color-ink-08); padding: 16px 14px 12px; box-shadow: 0 2px 5px #00000005; }
+.ghl-card:hover { border-color: var(--color-brand); box-shadow: 0 5px 14px #0000000a; }
+.ghl-card-title { font-size: 16px; }
+.ghl-card-row { font-size: 13px; }
+.ghl-card-actions { padding-top: 11px; }
+.opp-modal { border-radius: 18px; }
+.opp-modal-head { padding: 22px 24px; }
+.opp-modal-body { padding: 22px 24px 24px; }
+.opp-label { font-size: 14px; color: var(--color-ink-80); }
+.opp-modal .input, .opp-modal textarea { border-radius: 10px; }
+.crm-detail-h1 { font-size: clamp(32px, 4vw, 48px); letter-spacing: -.035em; }
+.input:focus, .em-input:focus, .em-input-square:focus, .crm-search:focus, .ghl-search input:focus { box-shadow: 0 0 0 3px #5f7a1f25; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+.dark .btn-primary, .dark .crm-pill[data-active="true"], .dark .crm-nav-badge { color: #182008; }
+.dark .crm-region-badge[data-region="SCREEN"] { background:#baf70320; color:#cbff3d; border-color:#baf70355; }
+.dark .crm-region-badge[data-region="CONCRETE"] { background:#b0bec520; color:#cfd8dc; border-color:#b0bec555; }
+.dark .crm-region-badge[data-region="PATIO"] { background:#e7c08a20; color:#e7c08a; border-color:#e7c08a55; }
+.dark .crm-region-badge[data-region="TURF"] { background:#8fce9f20; color:#8fce9f; border-color:#8fce9f55; }
+@media(min-width:1025px) { .em-sidebar { position: sticky; top: 0; height: 100vh; } }
+@media(max-width:1100px) and (min-width:641px) { .crm-topbar { padding: 22px 24px; flex-wrap: wrap; } }
+@media(max-width:640px) {
+ .crm-topbar { min-height: auto; }
+ .crm-topbar > div { flex-wrap: wrap; }
+ .crm-topbar form { flex: 1 1 100%; }
+ .crm-stats { margin: 16px; gap: 10px; }
+ .crm-stat, .crm-stat:nth-child(2n), .crm-stat:last-child { border: 1px solid var(--color-ink-08); padding: 18px; }
+ .crm-filters { padding: 14px 16px; }
+ .crm-filter { font-size: 14px; min-height: 40px; }
+ .crm-row { padding: 18px 16px; }
+ .ghl-toolbar { margin: 12px 12px 0; flex-wrap: wrap; }
+ .ghl-toolbar-right, .ghl-search { width: 100%; flex-basis: 100%; }
+ .ghl-board { padding: 16px 12px 24px; }
+ .opp-modal-head, .opp-modal-body { padding: 18px; }
+}
+@media(prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+
+/* Website-native LaborForceLink identity. Presentation only. */
+:root,.dark {
+ --color-white:#0a0a0a; --color-parchment:#1a1a1a; --color-pearl:#111;
+ --color-ink:#fff; --color-ink-80:#ddd; --color-ink-48:#a9ada2; --color-ink-08:#ffffff20;
+ --color-brand:#baf703; --color-brand-bright:#cbff3d; --color-brand-deep:#baf703; --color-brand-soft:#baf70315;
+ --color-accent:#baf703; --color-brand-hover:#cbff3d; --color-accent-hover:#cbff3d;
+ --color-hot:#ff8277; --color-hot-soft:#ff82771a; --color-warm:#efbf68; --color-warm-soft:#efbf681a;
+ --color-cold:#75bfff; --color-cold-soft:#75bfff1a; --color-customer:#9bd36d; --color-customer-soft:#9bd36d1a;
+ --color-lost:#b7bbb2; --color-lost-soft:#b7bbb21a;
+}
+body{font-family:Montserrat,sans-serif;letter-spacing:0}
+.crm-main,.ghl-board{background-color:var(--color-white);background-image:linear-gradient(#baf70309 1px,transparent 1px),linear-gradient(90deg,#baf70309 1px,transparent 1px);background-size:40px 40px}
+.lfl-brand-logo{width:100%;height:auto;object-fit:contain;display:block}
+.lfl-nav-icon{width:25px;height:25px;object-fit:contain;flex-shrink:0}
+.em-sidebar{border-right:1px solid #baf70326}
+.em-sidebar-link{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:6px;padding:14px 12px}
+.em-sidebar-link[data-active="true"]{background:#baf7030d;color:#baf703;box-shadow:none;border-color:#baf70366}
+.crm-page-title,.crm-detail-h1{font-weight:900;text-transform:uppercase;letter-spacing:-.035em}
+.crm-page-title{font-size:36px}.crm-topbar{min-height:100px}
+.btn-primary,.crm-pill[data-active="true"]{background:#baf703;color:#0a0a0a;border-radius:6px;font-weight:900}
+.btn-primary{font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:16px 20px}
+.btn-primary:hover:not(:disabled){background:#cbff3d}
+.crm-stat{background:#1a1a1a;border:1px solid #baf70326;border-radius:6px;padding:25px}
+.crm-stat-label{color:#baf703;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.crm-stat-value{font-size:40px;font-weight:900}
+.crm-search,.input,.em-input,.em-input-square,.opp-modal .input,.opp-modal textarea{border-radius:6px;background:#151515;color:#fff;border-color:#ffffff26}
+.crm-filter,.crm-pill{border-radius:6px;background:#1a1a1a;font-size:13px;font-weight:600}
+.crm-filter.active{background:#baf703;color:#0a0a0a}
+.crm-col-header{background:#151515;color:#baf703;letter-spacing:2px}
+.crm-filters,.crm-rows,.crm-row{background:#0a0a0a}
+.ghl-toolbar,.ghl-tool-btn,.ghl-pipeline-select,.ghl-icon-btn,.ghl-search input{background:#1a1a1a;border-radius:6px}
+.ghl-toolbar,.ghl-col{border-color:#baf70326}
+.ghl-col,.ghl-card,.surface-card,.opp-modal{border-radius:6px}
+.ghl-col{background:#1a1a1a}.ghl-card{background:#222}
+.ghl-col-name{font-weight:900;text-transform:uppercase;letter-spacing:.3px}
+.ghl-empty{padding:42px 10px}
+.opp-modal{background:#1a1a1a;border-color:#baf70340}
+.opp-modal-title{font-weight:900;text-transform:uppercase}
+.opp-label{color:#ddd}.crm-empty{font-size:14px}
+select option{background:#1a1a1a;color:white}
+.dark{--color-white:#141610;--color-parchment:#22261d;--color-pearl:#171b13}
+@media(max-width:640px){.crm-page-title{font-size:30px}.crm-stat{padding:18px}.crm-stat-label{letter-spacing:1px}.btn-primary{padding:14px;font-size:11px}.crm-topbar{min-height:auto}}
