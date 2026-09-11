@@ -76,7 +76,7 @@ export default function SetPasswordPage() {
 
     setLoading(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await supabase.auth.updateUser({ password, data: { needs_password_change: false } });
     setLoading(false);
 
     if (error) {
@@ -105,30 +105,7 @@ export default function SetPasswordPage() {
         style={{ width: "100%", maxWidth: 420, padding: 40 }}
       >
         <div style={{ marginBottom: 28, textAlign: "center" }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: "var(--color-brand)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 600,
-                fontSize: 16,
-                color: "#fff",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              LFL
-            </span>
-          </div>
+          <img src="/assets/lfl-logo.png" alt="Labor Force Link" className="lfl-login-logo" />
           <h1
             style={{
               fontFamily: "var(--font-display)",

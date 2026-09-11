@@ -20,7 +20,7 @@ export default function LoginPage() {
       });
       const result = await response.json();
       if (!response.ok) { setError(result.error || "Unable to sign in."); return; }
-      window.location.href = "/";
+      window.location.href = result.redirectTo === "/set-password" ? "/set-password" : "/";
     } catch {
       setError("Unable to connect. Please try again.");
     } finally {

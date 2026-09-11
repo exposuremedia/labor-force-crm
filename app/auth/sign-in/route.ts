@@ -17,14 +17,14 @@ export async function POST(request: Request) {
     const identifier = body.identifier.trim().toLowerCase();
     let email = identifier;
     if (!identifier.includes("@")) {
-      const aliases = JSON.parse(process.env.CRM_USERNAME_ALIASES || "{}");
+      const aliases = { james: "james@staff.laborforcelink.invalid", joe: "joe@staff.laborforcelink.invalid", ...JSON.parse(process.env.CRM_USERNAME_ALIASES || "{}") };
       const match = Object.prototype.hasOwnProperty.call(aliases, identifier) ? aliases[identifier] : null;
       email = typeof match === "string" ? match : "unregistered-login@invalid.invalid";
     }
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password: body.password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: body.password });
     if (error) return NextResponse.json({ error: "Incorrect username, email, or password." }, { status: 401 });
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, redirectTo: data.user?.user_metadata?.needs_password_change ? "/set-password" : "/" });
   } catch {
     return NextResponse.json({ error: "Unable to sign in. Please try again." }, { status: 500 });
   }
