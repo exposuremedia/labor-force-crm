@@ -1431,3 +1431,5 @@ dialog.opp-modal-backdrop .opp-modal { width:100%; max-height:none; }
 button:disabled { cursor:not-allowed; opacity:.55; }
 @media(max-width:640px) { .ghl-header{min-height:auto;} .ghl-header-left{gap:10px;} .crm-detail-wrap dl{grid-template-columns:1fr !important;} .crm-detail-wrap dd{margin-bottom:10px !important;} .input,.crm-search,.ghl-search input{font-size:16px;} }
 .ghl-col-body[hidden] { display:none; }
+.crm-detail-wrap input, .crm-detail-wrap textarea { min-width:0; }
+.crm-detail-wrap .btn-ghost, .crm-detail-wrap .btn-primary { flex-shrink:0; white-space:nowrap; }
