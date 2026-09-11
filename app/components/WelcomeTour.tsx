@@ -5,7 +5,7 @@ const steps = [
   ["Contacts", "Open Contacts to see applications. Search by name, email, phone, or company. Select a contact to open their full application."],
   ["Find the right crews", "Use the trade, language, status, location, and tag filters. Locations and tags appear when applications include them."],
   ["Crew pipeline", "Open Pipeline to follow applications from New Application through review, approval, and Active Crew. Drag a crew card to update its stage."],
-  ["Add an opportunity", "Use Add opportunity to enter a crew manually, choose a pipeline stage, and record its source and value."],
+  ["Add an opportunity", "Use Add opportunity to enter a crew manually, choose a pipeline stage, and record its source."],
   ["Application details and notes", "Open a contact to review their application answers, edit details, and add notes. You can reopen this walkthrough from the sidebar anytime."],
 ];
 export function WelcomeTour({ userEmail }: { userEmail: string }) {

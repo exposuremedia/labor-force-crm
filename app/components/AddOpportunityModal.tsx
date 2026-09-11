@@ -40,7 +40,6 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [stage, setStage] = useState<PipelineStage>("New Application");
-  const [value, setValue] = useState("");
   const [source, setSource] = useState("");
   const [trade, setRegion] = useState<Trade | "">("");
   const [notes, setNotes] = useState("");
@@ -65,7 +64,6 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
           phone: phone.trim() || null,
           company: company.trim() || null,
           pipeline_stage: stage,
-          opportunity_value: value === "" ? null : value,
           opportunity_source: source.trim() || null,
           trade: trade || null,
           notes: notes.trim() || null,
@@ -149,19 +147,6 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
                 <option value="PATIO">Patio</option>
                 <option value="TURF">Turf</option>
               </select>
-            </div>
-            <div>
-              <label htmlFor="opp-opportunity" className="opp-label">Opportunity value ($)</label>
-              <input
-                className="input"
-                type="number"
-                inputMode="decimal"
-                step="any"
-                id="opp-opportunity"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="0.00"
-              />
             </div>
             <Field label="Opportunity source" value={source} onChange={setSource} placeholder="e.g. referral, cold call" />
           </div>

@@ -1,3 +1,5 @@
+import Link from "next/link";
+import Form from "next/form";
 import { createClient } from "@/lib/supabase/server";
 import type { Contact } from "@/lib/types";
 import { LEAD_STATUSES } from "@/lib/types";
@@ -37,8 +39,8 @@ export default async function ContactsPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: profile } = user
-    ? await supabase
+  const profileQuery = user
+    ? supabase
         .from("profiles")
         .select("full_name, role")
         .eq("id", user.id)
@@ -78,26 +80,20 @@ export default async function ContactsPage({
     query = query.eq("market", params.market);
   }
 
-  const { data: contacts } = await query;
+  const [{ data: profile }, { data: contacts }, { data: facets }] = await Promise.all([
+    profileQuery,
+    query,
+    supabase.from("crm_contacts").select("market,tags").limit(5000),
+  ]);
   const list = (contacts || []) as Contact[];
-
-  // Markets and tags are derived from the rows themselves, so adding New York
-  // (or any new state) requires no code change — it appears once a lead lands.
-  const { data: marketRows } = await supabase
-    .from("crm_contacts")
-    .select("market")
-    .not("market", "is", null)
-    .limit(5000);
+  const marketRows = facets;
+  const tagRows = facets;
   const markets = Array.from(
     new Set(((marketRows || []) as { market: string | null }[])
       .map((r) => r.market)
       .filter((m): m is string => !!m))
   ).sort();
 
-  const { data: tagRows } = await supabase
-    .from("crm_contacts")
-    .select("tags")
-    .limit(5000);
   const tagCounts = new Map<string, number>();
   for (const r of (tagRows || []) as { tags: string[] | null }[]) {
     for (const t of r.tags || []) tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
@@ -140,6 +136,13 @@ export default async function ContactsPage({
   };
 
   const activeStatus = params.status ?? "";
+  function filterHref(key: string, value: string) {
+    const next = new URLSearchParams();
+    for (const [k,v] of Object.entries(params)) if (v) next.set(k,v);
+    if (value) next.set(key,value); else next.delete(key);
+    return next.size ? `/?${next}` : "/";
+  }
+
 
   return (
     <div className="crm-shell">
@@ -154,14 +157,15 @@ export default async function ContactsPage({
         <div className="crm-topbar">
           <h1 className="crm-page-title">Contacts</h1>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <form method="GET">
+            <Form action="/" scroll={false}>
+              {Object.entries(params).filter(([key,value]) => key !== "q" && value).map(([key,value]) => <input key={key} type="hidden" name={key} value={value} />)}
               <input
                 name="q"
                 defaultValue={params.q}
                 placeholder="Search name, email, phone…"
                 className="crm-search"
               />
-            </form>
+            </Form>
             <AddOpportunityButton />
           </div>
         </div>
@@ -198,13 +202,13 @@ export default async function ContactsPage({
             { key: "PATIO", label: "Patio" },
             { key: "TURF", label: "Turf" },
           ].map((t) => (
-            <a
+            <Link
               key={t.key || "all-trades"}
-              href={t.key ? `/?trade=${t.key}` : "/"}
+              scroll={false} href={filterHref("trade",t.key)}
               className={`crm-filter${(params.trade || "") === t.key ? " active" : ""}`}
             >
               {t.label}
-            </a>
+            </Link>
           ))}
           <span style={{ width: 12 }} />
           {[
@@ -212,61 +216,61 @@ export default async function ContactsPage({
             { key: "EN", label: "English" },
             { key: "ES", label: "Español" },
           ].map((l) => (
-            <a
+            <Link
               key={l.key || "all-lang"}
-              href={l.key ? `/?lang=${l.key}` : "/"}
+              scroll={false} href={filterHref("lang",l.key)}
               className={`crm-filter${(params.lang || "") === l.key ? " active" : ""}`}
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </div>
 
         {markets.length > 0 && (
           <div className="crm-filters" style={{ marginBottom: 4 }}>
-            <a
-              href="/"
+            <Link
+              scroll={false} href={filterHref("market","")}
               className={`crm-filter${!params.market ? " active" : ""}`}
             >
               All Locations
-            </a>
+            </Link>
             {markets.map((m) => (
-              <a
+              <Link
                 key={m}
-                href={`/?market=${encodeURIComponent(m)}`}
+                scroll={false} href={filterHref("market",m)}
                 className={`crm-filter${params.market === m ? " active" : ""}`}
               >
                 {m}
-              </a>
+              </Link>
             ))}
           </div>
         )}
 
         {topTags.length > 0 && (
           <div className="crm-filters" style={{ marginBottom: 4, flexWrap: "wrap" }}>
-            <a
-              href="/"
+            <Link
+              scroll={false} href={filterHref("tag","")}
               className={`crm-filter${!params.tag ? " active" : ""}`}
             >
               All Tags
-            </a>
+            </Link>
             {topTags.map(([t, n]) => (
-              <a
+              <Link
                 key={t}
-                href={`/?tag=${encodeURIComponent(t)}`}
+                scroll={false} href={filterHref("tag",t)}
                 className={`crm-filter${params.tag === t ? " active" : ""}`}
               >
                 {t} <span style={{ opacity: 0.5 }}>{n}</span>
-              </a>
+              </Link>
             ))}
           </div>
         )}
 
         <div className="crm-filters">
           {["", "Hot", "Warm", "Cold", "Customer", "Lost"].map((s) => (
-            <a
+            <Link
               key={s || "all"}
-              href={s ? `/?status=${s}` : "/"}
+              scroll={false} href={filterHref("status",s)}
               className="crm-pill"
               data-active={
                 (s === "" && !activeStatus) || s === activeStatus
@@ -275,7 +279,7 @@ export default async function ContactsPage({
               }
             >
               {s || "All"}
-            </a>
+            </Link>
           ))}
           <span className="crm-count">{list.length} contact{list.length === 1 ? "" : "s"}</span>
         </div>
@@ -300,7 +304,7 @@ export default async function ContactsPage({
               c.company ||
               "—";
             return (
-              <a
+              <Link
                 key={c.id}
                 href={`/contacts/${c.id}`}
                 className="crm-row"
@@ -347,7 +351,7 @@ export default async function ContactsPage({
                 <div className="crm-cell crm-mono">
                   {formatDate(c.ghl_date_added ?? c.created_at)}
                 </div>
-              </a>
+              </Link>
             );
           })}
         </div>

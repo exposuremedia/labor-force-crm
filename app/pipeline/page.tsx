@@ -29,7 +29,6 @@ export default async function PipelinePage() {
 
   const list = (contacts || []) as Contact[];
   const total = list.length;
-  const totalValue = list.reduce((s, c) => s + (c.opportunity_value || 0), 0);
 
   return (
     <div className="crm-shell">
@@ -46,7 +45,6 @@ export default async function PipelinePage() {
             <h1 className="crm-page-title">Crew Pipeline</h1>
             <span className="ghl-count-chip">
               {total} opportunit{total === 1 ? "y" : "ies"}
-              {totalValue > 0 ? ` · ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}` : ""}
             </span>
           </div>
           <div className="ghl-header-right">

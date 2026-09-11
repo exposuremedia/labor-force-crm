@@ -19,15 +19,6 @@ function contactName(c: Contact): string {
   return name || c.company || c.email || c.phone || "Unnamed";
 }
 
-function fmtMoney(n: number | null): string {
-  if (n == null || isNaN(n)) return "$0.00";
-  return n.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  });
-}
-
 export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] }) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [overCol, setOverCol] = useState<Column | null>(null);
@@ -58,7 +49,7 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
         phone.includes(q) ||
         company.includes(q)
       );
-    }).sort((a,b) => sort === "name" ? contactName(a).localeCompare(contactName(b)) : sort === "value" ? (b.opportunity_value || 0) - (a.opportunity_value || 0) : new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }).sort((a,b) => sort === "name" ? contactName(a).localeCompare(contactName(b)) : new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [contacts, search, trade, language, sort]);
 
   const grouped = useMemo(() => {
@@ -121,7 +112,7 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
         <div className="ghl-toolbar-left">
           <button className="ghl-tool-btn" type="button" aria-expanded={showFilters} onClick={() => setShowFilters(!showFilters)}>Filters{trade || language ? " •" : ""}</button>
           <select className="ghl-tool-btn" aria-label="Sort opportunities" value={sort} onChange={e => setSort(e.target.value)}>
-            <option value="newest">Newest first</option><option value="name">Name A–Z</option><option value="value">Highest value</option>
+            <option value="newest">Newest first</option><option value="name">Name A–Z</option>
           </select>
           <span className="ghl-result-count" aria-live="polite">{totalOps} result{totalOps === 1 ? "" : "s"}</span>
         </div>
@@ -149,7 +140,6 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
       <div className="ghl-board">
         {ALL_COLUMNS.map((col) => {
           const cards = grouped[col] || [];
-          const total = cards.reduce((s, c) => s + (c.opportunity_value || 0), 0);
           const isOver = overCol === col;
           return (
             <div
@@ -172,8 +162,6 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
                 </div>
                 <div className="ghl-col-meta">
                   <span>{cards.length} opportunit{cards.length === 1 ? "y" : "ies"}</span>
-                  <span className="ghl-col-meta-dot" />
-                  <span data-numeric>{fmtMoney(total)}</span>
                 </div>
               </div>
 
@@ -215,10 +203,7 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
                           <span className="ghl-card-val">{c.opportunity_source || c.lead_source}</span>
                         </div>
                       )}
-                      <div className="ghl-card-row">
-                        <span className="ghl-card-label">Value</span>
-                        <span className="ghl-card-val" data-numeric>{fmtMoney(c.opportunity_value)}</span>
-                      </div>
+
                       <div className="ghl-card-actions">View application →</div>
                     </Link>
                   );

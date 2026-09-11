@@ -66,9 +66,6 @@ export function ContactEditor({
   const [pipelineStage, setPipelineStage] = useState<PipelineStage | "">(
     (contact.pipeline_stage as PipelineStage) || ""
   );
-  const [oppValue, setOppValue] = useState<string>(
-    contact.opportunity_value != null ? String(contact.opportunity_value) : ""
-  );
   const [oppSource, setOppSource] = useState<string>(contact.opportunity_source || "");
 
   const [notes, setNotes] = useState<Note[]>(initialNotes);
@@ -83,7 +80,6 @@ export function ContactEditor({
     if (saving) return;
     setSaving(true); setError("");
     try {
-    const parsedValue = oppValue === "" ? null : parseFloat(oppValue);
     const body = {
       first_name: first || null,
       last_name: last || null,
@@ -95,7 +91,6 @@ export function ContactEditor({
       lead_status: status || null,
       tags,
       pipeline_stage: pipelineStage || null,
-      opportunity_value: parsedValue != null && Number.isFinite(parsedValue) ? parsedValue : null,
       opportunity_source: oppSource || null,
     };
     const r = await fetch(`/api/contacts/${contact.id}`, {
@@ -427,20 +422,6 @@ export function ContactEditor({
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="block text-xs text-[color:var(--color-olive)] mb-1">
-                Opportunity value ($)
-              </label>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="any"
-                className="input"
-                value={oppValue}
-                onChange={(e) => setOppValue(e.target.value)}
-                placeholder="0.00"
-              />
             </div>
             <div>
               <label className="block text-xs text-[color:var(--color-olive)] mb-1">
