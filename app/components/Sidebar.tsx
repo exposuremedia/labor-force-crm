@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { WelcomeTour } from "./WelcomeTour";
 import { SignOutButton } from "../signout-button";
-import { ThemeToggle } from "./ThemeToggle";
+
 
 type Item = {
   key: "contacts" | "pipeline";
@@ -27,6 +27,7 @@ export function Sidebar({
 }) {
   return (
     <aside
+      id="crm-sidebar"
       className="em-sidebar w-64 shrink-0 flex flex-col"
       style={{ padding: "20px 14px" }}
     >
@@ -108,7 +109,7 @@ export function Sidebar({
             }}
           >
             <SignOutButton />
-            <ThemeToggle />
+
           </div>
         </div>
       ) : null}

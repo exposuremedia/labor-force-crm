@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Contact, PipelineStage } from "@/lib/types";
 import { PIPELINE_STAGES } from "@/lib/types";
@@ -16,7 +16,7 @@ function contactName(c: Contact): string {
   const first = (c.first_name || "").trim();
   const last = (c.last_name || "").trim();
   const name = [first, last].filter(Boolean).join(" ").trim();
-  return titleCase(name || c.company || c.email || c.phone || "Unnamed");
+  return name || c.company || c.email || c.phone || "Unnamed";
 }
 
 function fmtMoney(n: number | null): string {
@@ -28,25 +28,26 @@ function fmtMoney(n: number | null): string {
   });
 }
 
-// Simple SVG icons for the activity row at the bottom of each card.
-function PhoneIcon() { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>); }
-function ChatIcon()  { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>); }
-function TagIcon()   { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5"/></svg>); }
-function DocIcon()   { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>); }
-function CheckIcon() { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>); }
-function CalIcon()   { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>); }
-
 export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] }) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [overCol, setOverCol] = useState<Column | null>(null);
   const [search, setSearch] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [trade, setTrade] = useState("");
+  const [language, setLanguage] = useState("");
+  const [sort, setSort] = useState("newest");
+  const [collapsed, setCollapsed] = useState<string[]>([]);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { setContacts(initialContacts); }, [initialContacts]);
   const dragId = useRef<string | null>(null);
   const prevStage = useRef<PipelineStage | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return contacts;
+
     return contacts.filter((c) => {
+      if (trade && c.trade !== trade || language && c.language !== language) return false;
       const name = contactName(c).toLowerCase();
       const email = (c.email || "").toLowerCase();
       const phone = (c.phone || "").toLowerCase();
@@ -57,8 +58,8 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
         phone.includes(q) ||
         company.includes(q)
       );
-    });
-  }, [contacts, search]);
+    }).sort((a,b) => sort === "name" ? contactName(a).localeCompare(contactName(b)) : sort === "value" ? (b.opportunity_value || 0) - (a.opportunity_value || 0) : new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [contacts, search, trade, language, sort]);
 
   const grouped = useMemo(() => {
     const g: Record<Column, Contact[]> = {} as Record<Column, Contact[]>;
@@ -73,6 +74,8 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
   const totalOps = filtered.length;
 
   function onDragStart(e: React.DragEvent, c: Contact) {
+    if (saving) { e.preventDefault(); return; }
+    e.dataTransfer.setData("text/plain", c.id);
     dragId.current = c.id;
     prevStage.current = c.pipeline_stage;
     e.dataTransfer.effectAllowed = "move";
@@ -90,6 +93,8 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
     const next: PipelineStage | null = col === "Unsorted" ? null : col;
     if (prev === next) return;
 
+    setSaving(true);
+    setError("");
     setContacts((cs) =>
       cs.map((c) => (c.id === id ? { ...c, pipeline_stage: next } : c))
     );
@@ -102,10 +107,11 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
       });
       if (!res.ok) throw new Error(await res.text());
     } catch {
+      setError("Stage could not be saved. The card has been restored. Please try again.");
       setContacts((cs) =>
         cs.map((c) => (c.id === id ? { ...c, pipeline_stage: prev } : c))
       );
-    }
+    } finally { setSaving(false); }
   }
 
   return (
@@ -113,14 +119,11 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
       {/* Sub-toolbar */}
       <div className="ghl-toolbar">
         <div className="ghl-toolbar-left">
-          <button className="ghl-tool-btn" type="button">
-            <span style={{ fontSize: 13 }}>⚙</span>
-            <span>Advanced Filters</span>
-          </button>
-          <button className="ghl-tool-btn" type="button">
-            <span style={{ fontSize: 13 }}>↕</span>
-            <span>Sort</span>
-          </button>
+          <button className="ghl-tool-btn" type="button" aria-expanded={showFilters} onClick={() => setShowFilters(!showFilters)}>Filters{trade || language ? " •" : ""}</button>
+          <select className="ghl-tool-btn" aria-label="Sort opportunities" value={sort} onChange={e => setSort(e.target.value)}>
+            <option value="newest">Newest first</option><option value="name">Name A–Z</option><option value="value">Highest value</option>
+          </select>
+          <span className="ghl-result-count" aria-live="polite">{totalOps} result{totalOps === 1 ? "" : "s"}</span>
         </div>
         <div className="ghl-toolbar-right">
           <div className="ghl-search">
@@ -135,6 +138,13 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
         </div>
       </div>
 
+      {showFilters && <div className="ghl-filter-panel">
+        <label>Trade<select className="input" value={trade} onChange={e => setTrade(e.target.value)}><option value="">All trades</option>{["SCREEN","CONCRETE","PATIO","TURF"].map(t => <option key={t}>{t}</option>)}</select></label>
+        <label>Language<select className="input" value={language} onChange={e => setLanguage(e.target.value)}><option value="">All languages</option><option value="EN">English</option><option value="ES">Español</option></select></label>
+        <button className="btn-ghost" onClick={() => { setTrade(""); setLanguage(""); setSearch(""); }}>Clear filters</button>
+      </div>}
+      {error && <p className="opp-err" role="alert">{error}</p>}
+      {saving && <p role="status">Saving stage…</p>}
       {/* Stage columns */}
       <div className="ghl-board">
         {ALL_COLUMNS.map((col) => {
@@ -146,6 +156,7 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
               key={col}
               className="ghl-col"
               data-stage={col}
+              data-collapsed={collapsed.includes(col)}
               data-over={isOver ? "true" : undefined}
               onDragOver={(e) => {
                 e.preventDefault();
@@ -157,16 +168,16 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
               <div className="ghl-col-head">
                 <div className="ghl-col-name">
                   <span>{col}</span>
-                  <button className="ghl-col-chev" type="button" aria-label="Collapse column">‹</button>
+                  <button className="ghl-col-chev" type="button" aria-label={`${collapsed.includes(col) ? "Expand" : "Collapse"} ${col}`} aria-expanded={!collapsed.includes(col)} onClick={() => setCollapsed(cs => cs.includes(col) ? cs.filter(c => c !== col) : [...cs,col])}>{collapsed.includes(col) ? "+" : "−"}</button>
                 </div>
                 <div className="ghl-col-meta">
-                  <span>{cards.length} Opportunities</span>
+                  <span>{cards.length} opportunit{cards.length === 1 ? "y" : "ies"}</span>
                   <span className="ghl-col-meta-dot" />
                   <span data-numeric>{fmtMoney(total)}</span>
                 </div>
               </div>
 
-              <div className="ghl-col-body">
+              <div className="ghl-col-body" hidden={collapsed.includes(col)}>
                 {cards.map((c) => {
                   const name = contactName(c);
                   return (
@@ -174,7 +185,8 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
                       key={c.id}
                       href={`/contacts/${c.id}`}
                       className="ghl-card"
-                      draggable
+                      draggable={!saving}
+                      onDragEnd={() => { dragId.current = null; setOverCol(null); }}
                       onDragStart={(e) => onDragStart(e, c)}
                     >
                       <div className="ghl-card-head">
@@ -199,22 +211,15 @@ export function KanbanBoard({ initialContacts }: { initialContacts: Contact[] })
                       </div>
                       {(c.opportunity_source || c.lead_source) && (
                         <div className="ghl-card-row">
-                          <span className="ghl-card-label">Opportunity Sou…</span>
-                          <span className="ghl-card-val">{(c.opportunity_source || c.lead_source || "").toUpperCase()}</span>
+                          <span className="ghl-card-label">Source</span>
+                          <span className="ghl-card-val">{c.opportunity_source || c.lead_source}</span>
                         </div>
                       )}
                       <div className="ghl-card-row">
-                        <span className="ghl-card-label">Opportunity Val…</span>
+                        <span className="ghl-card-label">Value</span>
                         <span className="ghl-card-val" data-numeric>{fmtMoney(c.opportunity_value)}</span>
                       </div>
-                      <div className="ghl-card-actions">
-                        <span className="ghl-act"><PhoneIcon /></span>
-                        <span className="ghl-act"><ChatIcon /></span>
-                        <span className="ghl-act"><TagIcon /></span>
-                        <span className="ghl-act"><DocIcon /></span>
-                        <span className="ghl-act"><CheckIcon /></span>
-                        <span className="ghl-act"><CalIcon /></span>
-                      </div>
+                      <div className="ghl-card-actions">View application →</div>
                     </Link>
                   );
                 })}

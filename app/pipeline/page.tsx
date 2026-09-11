@@ -43,18 +43,13 @@ export default async function PipelinePage() {
         {/* Header bar — pipeline selector + count + actions */}
         <div className="ghl-header">
           <div className="ghl-header-left">
-            <button className="ghl-pipeline-select" type="button">
-              <span className="ghl-pipeline-name">Crew Pipeline</span>
-              <span className="ghl-pipeline-chev">▾</span>
-            </button>
+            <h1 className="crm-page-title">Crew Pipeline</h1>
             <span className="ghl-count-chip">
               {total} opportunit{total === 1 ? "y" : "ies"}
               {totalValue > 0 ? ` · ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}` : ""}
             </span>
           </div>
           <div className="ghl-header-right">
-            <button className="ghl-icon-btn" type="button" title="Grid view" aria-label="Grid view">▦</button>
-            <button className="ghl-icon-btn" type="button" title="Import" aria-label="Import">↓</button>
             <AddOpportunityButton />
           </div>
         </div>

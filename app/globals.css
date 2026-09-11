@@ -1357,6 +1357,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--color-brand); o
 
 /* Website-native LaborForceLink identity. Presentation only. */
 :root,.dark {
+ color-scheme:dark;
+ --color-charcoal:#ddd; --color-olive:#b0b3ab; --color-stone:#a9ada2;
+ --color-cream:#242424; --color-sand:#29271e; --color-border-cream:#ffffff20;
+ --color-danger:#ff8277; --color-danger-soft:#ff82771a; --color-success:#9bd36d; --color-success-soft:#9bd36d1a;
  --color-white:#0a0a0a; --color-parchment:#1a1a1a; --color-pearl:#111;
  --color-ink:#fff; --color-ink-80:#ddd; --color-ink-48:#a9ada2; --color-ink-08:#ffffff20;
  --color-brand:#baf703; --color-brand-bright:#cbff3d; --color-brand-deep:#baf703; --color-brand-soft:#baf70315;
@@ -1395,5 +1399,34 @@ body{font-family:Montserrat,sans-serif;letter-spacing:0}
 .opp-modal-title{font-weight:900;text-transform:uppercase}
 .opp-label{color:#ddd}.crm-empty{font-size:14px}
 select option{background:#1a1a1a;color:white}
-.dark{--color-white:#141610;--color-parchment:#22261d;--color-pearl:#171b13}
+
 @media(max-width:640px){.crm-page-title{font-size:30px}.crm-stat{padding:18px}.crm-stat-label{letter-spacing:1px}.btn-primary{padding:14px;font-size:11px}.crm-topbar{min-height:auto}}
+
+/* QC: consistent surfaces, readable details and responsive dialogs. */
+.ghl-header { background:var(--color-white); min-height:100px; }
+.ghl-header-left { flex-wrap:wrap; }
+.ghl-header .crm-page-title { font-size:clamp(24px,3vw,32px); margin:0; }
+.ghl-pipeline { min-height:0; padding:0; flex:1; }
+.ghl-board { min-height:65vh; scrollbar-color:#555 #151515; }
+.ghl-toolbar-left { flex-wrap:wrap; }
+.ghl-card-label { flex:0 0 auto; }
+.ghl-card-val { min-width:0; overflow-wrap:anywhere; white-space:normal; }
+.ghl-card-title { text-transform:none; overflow-wrap:anywhere; }
+.ghl-col-chev { min-width:32px; min-height:32px; }
+.ghl-col[data-collapsed="true"] { flex-basis:190px; width:190px; }
+.ghl-filter-panel { display:flex; flex-wrap:wrap; gap:12px; margin:12px 20px; }
+.ghl-filter-panel label { display:grid; gap:6px; font-size:12px; flex:1; min-width:140px; }
+.lfl-login-logo { width:100%; max-width:300px; margin:0 auto 28px; }
+.crm-detail-wrap { width:100%; }
+.crm-detail-wrap .surface-card, .crm-detail-wrap aside, .crm-detail-wrap .pill { min-width:0; overflow-wrap:anywhere; }
+.crm-detail-wrap .pill { white-space:normal; }
+.crm-detail-wrap dd { min-width:0; overflow-wrap:anywhere; }
+.crm-detail-actions { flex-wrap:wrap; }
+dialog.opp-modal-backdrop { margin:auto; padding:0; width:min(600px,calc(100% - 24px)); max-height:calc(100dvh - 24px); border:0; background:transparent; overflow:auto; color:var(--color-ink); position:fixed; }
+dialog.opp-modal-backdrop:not([open]) { display:none; }
+dialog.opp-modal-backdrop[open] { display:block; }
+dialog::backdrop { background:#000b; backdrop-filter:blur(3px); }
+dialog.opp-modal-backdrop .opp-modal { width:100%; max-height:none; }
+.em-sidebar { overflow-y:auto; }
+button:disabled { cursor:not-allowed; opacity:.55; }
+@media(max-width:640px) { .ghl-header{min-height:auto;} .ghl-header-left{gap:10px;} .crm-detail-wrap dl{grid-template-columns:1fr !important;} .crm-detail-wrap dd{margin-bottom:10px !important;} .input,.crm-search,.ghl-search input{font-size:16px;} }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Contact, Note, LeadStatus, PipelineStage } from "@/lib/types";
 import { PIPELINE_STAGES } from "@/lib/types";
@@ -44,6 +44,9 @@ export function ContactEditor({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [saving, setSaving] = useState(false);
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [error, setError] = useState("");
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
 
   const [first, setFirst] = useState(contact.first_name || "");
@@ -77,6 +80,9 @@ export function ContactEditor({
   }
 
   async function save() {
+    if (saving) return;
+    setSaving(true); setError("");
+    try {
     const parsedValue = oppValue === "" ? null : parseFloat(oppValue);
     const body = {
       first_name: first || null,
@@ -102,8 +108,10 @@ export function ContactEditor({
       startTransition(() => router.refresh());
     } else {
       const t = await r.text();
-      alert("Save failed: " + t.slice(0, 200));
+      setError("Save failed. Please try again.");
     }
+    } catch { setError("Connection lost. Your changes have not been saved. Please try again."); }
+    finally { setSaving(false); }
   }
 
   async function remove() {
@@ -118,7 +126,9 @@ export function ContactEditor({
   }
 
   async function addNote() {
-    if (!newNote.trim()) return;
+    if (!newNote.trim() || noteSaving) return;
+    setNoteSaving(true); setError("");
+    try {
     const r = await fetch(`/api/notes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -126,12 +136,14 @@ export function ContactEditor({
     });
     if (r.ok) {
       const inserted = (await r.json()) as Note;
-      setNotes([inserted, ...notes]);
+      setNotes(ns => [inserted, ...ns]);
       setNewNote("");
     } else {
       const t = await r.text();
-      alert("Add note failed: " + t.slice(0, 200));
+      setError("The note could not be saved. Please try again.");
     }
+    } catch { setError("Connection lost. Your note has not been saved."); }
+    finally { setNoteSaving(false); }
   }
 
   async function deleteNote(id: string) {
@@ -165,6 +177,7 @@ export function ContactEditor({
           <h2 className="font-display text-lg text-[color:var(--color-ink)]">
             Details
           </h2>
+          {error && <p className="opp-err" role="alert">{error}</p>}
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="First name" value={first} onChange={setFirst} />
             <Field label="Last name" value={last} onChange={setLast} />
@@ -184,9 +197,9 @@ export function ContactEditor({
             />
           </div>
 
-          <div className="mt-4 flex items-center gap-3 pt-3 border-t border-[color:var(--color-border-cream)]">
-            <button onClick={save} disabled={pending} className="btn-primary">
-              {pending ? "Saving…" : "Save changes"}
+          <div className="crm-detail-actions mt-4 flex items-center gap-3 pt-3 border-t border-[color:var(--color-border-cream)]">
+            <button onClick={save} disabled={pending || saving} className="btn-primary">
+              {pending || saving ? "Saving…" : "Save changes"}
             </button>
             <button onClick={remove} className="btn-ghost" style={{ color: "var(--color-danger)" }}>
               Delete contact
@@ -282,7 +295,7 @@ export function ContactEditor({
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
             />
-            <button onClick={addNote} className="btn-primary self-start">
+            <button onClick={addNote} disabled={noteSaving || !newNote.trim()} className="btn-primary self-start">
               Add
             </button>
           </div>
@@ -438,13 +451,13 @@ export function ContactEditor({
                 className="input"
                 value={oppSource}
                 onChange={(e) => setOppSource(e.target.value)}
-                placeholder="e.g. referral, cold call, /sc landing"
+                placeholder="e.g. referral, cold call, website application"
               />
             </div>
             {contact.trade ? (
               <div>
                 <label className="block text-xs text-[color:var(--color-olive)] mb-1">
-                  Region
+                  Trade
                 </label>
                 <span
                   className="crm-region-badge"
@@ -454,7 +467,7 @@ export function ContactEditor({
                   {contact.trade}
                 </span>
                 <p className="mt-2 text-xs text-[color:var(--color-stone)]">
-                  Set at intake from source URL or phone area code. Contact support to change.
+                  Recorded from the application’s trade and source.
                 </p>
               </div>
             ) : null}
@@ -507,12 +520,14 @@ function Field({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const id = useId();
   return (
     <div>
-      <label className="block text-xs text-[color:var(--color-olive)] mb-1">
+      <label htmlFor={id} className="block text-xs text-[color:var(--color-olive)] mb-1">
         {label}
       </label>
       <input
+        id={id}
         type="text"
         className="input"
         value={value}

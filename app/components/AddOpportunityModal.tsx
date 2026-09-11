@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PIPELINE_STAGES, type PipelineStage } from "@/lib/types";
 import type { Trade } from "@/lib/trade";
@@ -30,6 +30,8 @@ export function AddOpportunityButton({
 
 function AddOpportunityModal({ onClose }: { onClose: () => void }) {
   const router = useRouter();
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => { dialog.current?.showModal(); }, []);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -88,13 +90,16 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div
+    <dialog
+      ref={dialog}
+      aria-label="Add opportunity"
       className="opp-modal-backdrop"
+      onCancel={(e) => { e.preventDefault(); if (!submitting) onClose(); }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget && !submitting) onClose();
       }}
     >
-      <div className="opp-modal" role="dialog" aria-modal="true" aria-label="Add opportunity">
+      <div className="opp-modal">
         <div className="opp-modal-head">
           <h2 className="opp-modal-title">Add opportunity</h2>
           <button
@@ -102,6 +107,7 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
             className="opp-modal-close"
             onClick={onClose}
             aria-label="Close"
+            disabled={submitting}
           >
             ×
           </button>
@@ -117,9 +123,10 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
 
           <div className="opp-grid">
             <div>
-              <label className="opp-label">Pipeline stage</label>
+              <label htmlFor="opp-pipeline" className="opp-label">Pipeline stage</label>
               <select
                 className="input"
+                id="opp-pipeline"
                 value={stage}
                 onChange={(e) => setStage(e.target.value as PipelineStage)}
               >
@@ -129,24 +136,28 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
               </select>
             </div>
             <div>
-              <label className="opp-label">Trade</label>
+              <label htmlFor="opp-trade" className="opp-label">Trade</label>
               <select
                 className="input"
+                id="opp-trade"
                 value={trade}
                 onChange={(e) => setRegion(e.target.value as Trade | "")}
               >
-                <option value="">Auto-detect from phone</option>
-                <option value="SCREEN">NY — New York</option>
-                <option value="CONCRETE">SC — South Carolina</option>
+                <option value="">Select a trade</option>
+                <option value="SCREEN">Screen</option>
+                <option value="CONCRETE">Concrete</option>
+                <option value="PATIO">Patio</option>
+                <option value="TURF">Turf</option>
               </select>
             </div>
             <div>
-              <label className="opp-label">Opportunity value ($)</label>
+              <label htmlFor="opp-opportunity" className="opp-label">Opportunity value ($)</label>
               <input
                 className="input"
                 type="number"
                 inputMode="decimal"
                 step="any"
+                id="opp-opportunity"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder="0.00"
@@ -156,11 +167,12 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="opp-label">Notes</label>
+            <label htmlFor="opp-notes" className="opp-label">Notes</label>
             <textarea
               className="input"
               style={{ minHeight: 80 }}
-              value={notes}
+              id="opp-notes"
+                value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Anything worth remembering about this lead"
             />
@@ -178,7 +190,7 @@ function AddOpportunityModal({ onClose }: { onClose: () => void }) {
           </div>
         </form>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -197,10 +209,12 @@ function Field({
   autoComplete?: string;
   placeholder?: string;
 }) {
+  const id = useId();
   return (
     <div>
-      <label className="opp-label">{label}</label>
+      <label htmlFor={id} className="opp-label">{label}</label>
       <input
+        id={id}
         type={type}
         className="input"
         value={value}

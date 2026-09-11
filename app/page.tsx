@@ -210,7 +210,7 @@ export default async function ContactsPage({
           {[
             { key: "", label: "EN + ES" },
             { key: "EN", label: "English" },
-            { key: "ES", label: "Espanol" },
+            { key: "ES", label: "Español" },
           ].map((l) => (
             <a
               key={l.key || "all-lang"}
@@ -277,7 +277,7 @@ export default async function ContactsPage({
               {s || "All"}
             </a>
           ))}
-          <span className="crm-count">{list.length} contacts</span>
+          <span className="crm-count">{list.length} contact{list.length === 1 ? "" : "s"}</span>
         </div>
 
         <div className="crm-col-header">

@@ -21,8 +21,12 @@ export function MobileNav({ title }: { title: string }) {
   // Close on route change (best effort — popstate covers back/forward)
   useEffect(() => {
     const close = () => setOpen(false);
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    const navigate = (e: MouseEvent) => { if ((e.target as Element).closest(".em-sidebar a")) close(); };
     window.addEventListener("popstate", close);
-    return () => window.removeEventListener("popstate", close);
+    document.addEventListener("keydown", key);
+    document.addEventListener("click", navigate);
+    return () => { window.removeEventListener("popstate", close); document.removeEventListener("keydown", key); document.removeEventListener("click", navigate); };
   }, []);
 
   return (
@@ -33,6 +37,7 @@ export function MobileNav({ title }: { title: string }) {
           className="crm-hamburger"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
+          aria-controls="crm-sidebar"
           onClick={() => setOpen((o) => !o)}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
